@@ -9,6 +9,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Build;
@@ -42,6 +43,8 @@ import io.socket.emitter.Emitter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Random;
+
 /**
  * Created by Ayush Jain on 8/31/17.
  */
@@ -52,6 +55,8 @@ public class LocationUpdatesService extends Service {
 
     public static final String ACTION_BROADCAST = LocationUpdatesService.class.getPackage().getName() + ".broadcast";
     public static final String EXTRA_LOCATION = LocationUpdatesService.class.getPackage().getName() + ".location";
+    public static final String EXTRA_DATA = LocationUpdatesService.class.getPackage().getName() + ".data";
+
     private static final String EXTRA_STARTED_FROM_NOTIFICATION = LocationUpdatesService.class.getPackage().getName() +
             ".started_from_notification";
 
@@ -105,8 +110,9 @@ public class LocationUpdatesService extends Service {
                 Intent intent = new Intent(ACTION_BROADCAST);
                 mLocation = locationResult.getLastLocation();
                 Log.d("mlocationResult", "::" + mLocation);
-                intent.putExtra(EXTRA_LOCATION, locationResult.getLastLocation());
+                intent.putExtra(EXTRA_LOCATION, locationResult.getLastLocation() + " :: ");
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+
 
                 // Update notification content if running as a foreground service.
                 if (serviceIsRunningInForeground(LocationUpdatesService.this)) {
@@ -148,9 +154,6 @@ public class LocationUpdatesService extends Service {
             public void call(Object... args) {
 
                 onMessage("EVENT_CONNECT");
-                for (int i = 0; i < 100; i++) {
-                    mSocket.emit("testing_location", "hi");
-                }
 
             }
         }).on(Socket.EVENT_CONNECTING, new Emitter.Listener() {
@@ -186,6 +189,13 @@ public class LocationUpdatesService extends Service {
 //                JSONObject obj = (JSONObject) args[0];
                 if (args != null && args.length > 0)
                     Log.e("data", "" + args[args.length - 1]);
+
+                Intent intent = new Intent(ACTION_BROADCAST);
+                Log.d("mlocationResult", "::" + args[args.length - 1]);
+                intent.putExtra(EXTRA_DATA, args[args.length - 1] + "");
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+
+
             }
         });
         if (!mSocket.connected())

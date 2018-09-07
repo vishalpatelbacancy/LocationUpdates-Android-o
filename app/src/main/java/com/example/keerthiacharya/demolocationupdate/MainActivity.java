@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.IBinder;
@@ -22,11 +23,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.example.keerthiacharya.demolocationupdate.common.Utils;
 import com.example.keerthiacharya.demolocationupdate.receiver.LocationReceiver;
 import com.example.keerthiacharya.demolocationupdate.service.LocationUpdatesService;
+
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private LocationUpdatesService mLUService;
     private LocationReceiver myReceiver;
     LinearLayout ll;
+    ScrollView scrollView;
+
     // Tracks the bound state of the service.
     private boolean mBound = false;
 
@@ -45,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ll = findViewById(R.id.ll);
+        scrollView = findViewById(R.id.scrollView);
+
         if (!checkPermission()) {
             requestPermissions();
         }
@@ -62,7 +70,10 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
-                    addText(Utils.getLocationText(location));
+                    String data = intent.getStringExtra(LocationUpdatesService.EXTRA_DATA);
+                    if (data != null) {
+                        addText(Utils.getLocationText(location) + "\n" + data);
+                    }
                     super.onReceive(context, intent);
                 }
             };
@@ -104,8 +115,11 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void addText(String str) {
+        Random rnd = new Random();
+        int currentStrokeColor = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
         TextView text = new TextView(this);
         text.setText(str);
+        text.setTextColor(currentStrokeColor);
         ll.addView(text);
     }
 

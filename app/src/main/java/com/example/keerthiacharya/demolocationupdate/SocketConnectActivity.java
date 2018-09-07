@@ -50,10 +50,6 @@ public class SocketConnectActivity extends AppCompatActivity {
 
 //                testing_location
 
-                for (int i = 0; i < 100; i++) {
-                    mSocket.emit("testing_location", "hi");
-                }
-
             }
         }).on(Socket.EVENT_PING, new Emitter.Listener() {
             @Override
