@@ -27,7 +27,6 @@ import okhttp3.OkHttpClient;
 
 public class MyApp extends Application {
     private static Context context;
-
     private Socket mSocket;
 
     @Override
@@ -129,7 +128,7 @@ public class MyApp extends Application {
 //        opts.reconnection = true;
 
         try {
-            mSocket = IO.socket(getResources().getString(R.string.Socket_URL_NEW), options);
+            mSocket = IO.socket(getResources().getString(R.string.Socket_URL), options);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }

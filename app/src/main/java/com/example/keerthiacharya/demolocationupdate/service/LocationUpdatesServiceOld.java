@@ -192,7 +192,7 @@ public class LocationUpdatesServiceOld extends Service {
 //        });
 //
 //        // Receiving an object
-//        mSocket.on("testing_location", new Emitter.Listener() {
+//        mSocket.on("hefty_location", new Emitter.Listener() {
 //            @Override
 //            public void call(Object... args) {
 //

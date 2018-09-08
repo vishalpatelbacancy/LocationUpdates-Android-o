@@ -48,7 +48,7 @@ public class SocketConnectActivity extends AppCompatActivity {
 
                 onMessage("EVENT_CONNECT");
 
-//                testing_location
+//                hefty_location
 
             }
         }).on(Socket.EVENT_PING, new Emitter.Listener() {
@@ -91,7 +91,7 @@ public class SocketConnectActivity extends AppCompatActivity {
             }
         });
 
-        mSocket.emit("testing_location", "hello Rajdip", new Ack() {
+        mSocket.emit("hefty_location", "hello Rajdip", new Ack() {
             @Override
             public void call(Object... args) {
 
@@ -101,7 +101,7 @@ public class SocketConnectActivity extends AppCompatActivity {
         });
 
         // Receiving an object
-        mSocket.on("testing_location", new Emitter.Listener() {
+        mSocket.on("hefty_location", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
 

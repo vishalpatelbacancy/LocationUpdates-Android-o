@@ -57,6 +57,19 @@ public class MainActivity extends AppCompatActivity {
         if (!checkPermission()) {
             requestPermissions();
         }
+
+        myReceiver = new LocationReceiver() {
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+//                    Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
+                String data = intent.getStringExtra(LocationUpdatesService.EXTRA_DATA);
+                if (data != null) {
+                    addText(data+ "\n");
+                }
+                super.onReceive(context, intent);
+            }
+        };
     }
 
     @Override
@@ -66,18 +79,7 @@ public class MainActivity extends AppCompatActivity {
             if (mLUService == null)
                 mLUService = new LocationUpdatesService();
 
-            myReceiver = new LocationReceiver() {
 
-                @Override
-                public void onReceive(Context context, Intent intent) {
-//                    Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
-                    String data = intent.getStringExtra(LocationUpdatesService.EXTRA_DATA);
-                    if (data != null) {
-                        addText(data+ "\n");
-                    }
-                    super.onReceive(context, intent);
-                }
-            };
 
             btnStartUpdate = (Button) findViewById(R.id.request_location_updates_button);
             btnStopUpdate = (Button) findViewById(R.id.remove_location_updates_button);

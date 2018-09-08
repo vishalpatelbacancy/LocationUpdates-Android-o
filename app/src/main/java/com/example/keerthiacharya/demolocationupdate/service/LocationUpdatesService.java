@@ -111,7 +111,7 @@ public class LocationUpdatesService extends Service {
                 mLocation = locationResult.getLastLocation();
                 Log.d("mlocationResult", "::" + mLocation);
                 intent.putExtra(EXTRA_LOCATION, locationResult.getLastLocation() + " :: ");
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+//                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
 
 
                 // Update notification content if running as a foreground service.
@@ -179,10 +179,20 @@ public class LocationUpdatesService extends Service {
             public void call(Object... args) {
                 onMessage("EVENT_DISCONNECT");
             }
+        }).on(Socket.EVENT_MESSAGE, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+
+                if (args != null && args.length > 0)
+                    Log.e("data", "" + args[args.length - 1]);
+
+
+            }
         });
 
+
         // Receiving an object
-        mSocket.on("testing_location", new Emitter.Listener() {
+        mSocket.on("hefty_location_124", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
 
@@ -190,16 +200,75 @@ public class LocationUpdatesService extends Service {
                 if (args != null && args.length > 0)
                     Log.e("data", "" + args[args.length - 1]);
 
-//                Intent intent = new Intent(ACTION_BROADCAST);
-//                Log.d("mlocationResult", "::" + args[args.length - 1]);
-//                intent.putExtra(EXTRA_DATA, args[args.length - 1] + "");
-//                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+                Intent intent = new Intent(ACTION_BROADCAST);
+                intent.putExtra(EXTRA_DATA, args[args.length - 1] + "");
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+
+
+            }
+        });
+
+//        // Receiving an object
+//        mSocket.on("object.event", new Emitter.Listener() {
+//            @Override
+//            public void call(Object... args) {
+//
+////                JSONObject obj = (JSONObject) args[0];
+//                if (args != null && args.length > 0)
+//                    Log.e("data--------->", "" + args[args.length - 1]);
+//
+////                Intent intent = new Intent(ACTION_BROADCAST);
+////                intent.putExtra(EXTRA_DATA, args[args.length - 1] + "");
+////                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+//
+//
+//            }
+//        });
+
+
+        // Receiving an object
+        mSocket.on("hefty_location_133", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+
+//                JSONObject obj = (JSONObject) args[0];
+                if (args != null && args.length > 0)
+                    Log.e("data", "" + args[args.length - 1]);
+
+                Intent intent = new Intent(ACTION_BROADCAST);
+                intent.putExtra(EXTRA_DATA, args[args.length - 1] + "");
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
 
 
             }
         });
         if (!mSocket.connected())
             mSocket.connect();
+
+
+//        final Handler myHandler = new Handler();
+//
+//        Runnable runnableforadd = new Runnable() {
+//            public void run() {
+//                final JSONObject obj = new JSONObject();
+//
+////                {"id":"133","lat":"23.0501412","lng":"72.5045998","oid":"1824","roleId":"2"}
+//                try {
+//                    obj.put("id", "133");
+//                    obj.put("lat", "23.33333");
+//                    obj.put("lng", "72.33333");
+//                    obj.put("oid", "1824");
+//                    obj.put("roleId", "2");
+//                    mSocket.emit("hefty_location", obj);
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//                myHandler.postDelayed(this, 2000);
+//            }
+//        };
+//
+//        myHandler.postDelayed(runnableforadd, 2000);
+
     }
 
 
@@ -410,35 +479,35 @@ public class LocationUpdatesService extends Service {
 
     private void sendSocket() {
 
-        if (mSocket != null && mSocket.connected()) {
-            final JSONObject obj = new JSONObject();
-            try {
-                obj.put("id", "124");
-                obj.put("lat", mLocation.getLatitude() + "");
-                obj.put("lng", mLocation.getLongitude() + "");
-                obj.put("oid", tripID);
-                obj.put("roleId", "10");
+//        if (mSocket != null && mSocket.connected()) {
+//            final JSONObject obj = new JSONObject();
+//            try {
+//                obj.put("id", "124");
+//                obj.put("lat", "23.33333");
+//                obj.put("lng", "72.33333");
+//                obj.put("oid", "1824");
+//                obj.put("roleId", "10");
+//
+//                Log.d("socket", "socket updated::" + obj.toString());
+//
+//
+////                new Handler(Looper.getMainLooper()).post(new Runnable() {
+////                    public void run() {
+////                        Toast.makeText(LocationUpdatesService.this, "sendSocket \n" + obj.toString(), Toast.LENGTH_SHORT).show();
+////                    }
+////                });
+//
+//                mSocket.emit("hefty_location", obj);
+////                if (Pref.getValue(this, StringLabels.WhereLeft, "").equalsIgnoreCase(START_TRIP) ||
+////                        Pref.getValue(this, StringLabels.WhereLeft, "").equalsIgnoreCase(PICKUP_TRIP)) {
+////                    mSocket.emit("hefty_live_location", obj);
+////                }
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
 
-                Log.d("socket", "socket updated::" + obj.toString());
 
-
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    public void run() {
-                        Toast.makeText(LocationUpdatesService.this, "sendSocket \n" + obj.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-                mSocket.emit("testing_location", obj);
-//                if (Pref.getValue(this, StringLabels.WhereLeft, "").equalsIgnoreCase(START_TRIP) ||
-//                        Pref.getValue(this, StringLabels.WhereLeft, "").equalsIgnoreCase(PICKUP_TRIP)) {
-//                    mSocket.emit("hefty_live_location", obj);
-//                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-
-        }
+//        }
 
 
     }
