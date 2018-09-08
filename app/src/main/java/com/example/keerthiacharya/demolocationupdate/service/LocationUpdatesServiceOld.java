@@ -9,7 +9,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Build;
@@ -23,10 +22,13 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.keerthiacharya.demolocationupdate.LogM;
 import com.example.keerthiacharya.demolocationupdate.MainActivity;
 import com.example.keerthiacharya.demolocationupdate.MyApp;
 import com.example.keerthiacharya.demolocationupdate.R;
-
+import com.example.keerthiacharya.demolocationupdate.SocketIO.IOAcknowledge;
+import com.example.keerthiacharya.demolocationupdate.SocketIO.IOCallback;
+import com.example.keerthiacharya.demolocationupdate.SocketIO.SocketIO;
 import com.example.keerthiacharya.demolocationupdate.common.Utils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationAvailability;
@@ -37,27 +39,26 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Random;
+import java.net.MalformedURLException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Ayush Jain on 8/31/17.
  */
 
-public class LocationUpdatesService extends Service {
+public class LocationUpdatesServiceOld extends Service {
 
-    private static final String TAG = LocationUpdatesService.class.getSimpleName();
+    private static final String TAG = LocationUpdatesServiceOld.class.getSimpleName();
 
-    public static final String ACTION_BROADCAST = LocationUpdatesService.class.getPackage().getName() + ".broadcast";
-    public static final String EXTRA_LOCATION = LocationUpdatesService.class.getPackage().getName() + ".location";
-    public static final String EXTRA_DATA = LocationUpdatesService.class.getPackage().getName() + ".data";
+    public static final String ACTION_BROADCAST = LocationUpdatesServiceOld.class.getPackage().getName() + ".broadcast";
+    public static final String EXTRA_LOCATION = LocationUpdatesServiceOld.class.getPackage().getName() + ".location";
+    public static final String EXTRA_DATA = LocationUpdatesServiceOld.class.getPackage().getName() + ".data";
 
-    private static final String EXTRA_STARTED_FROM_NOTIFICATION = LocationUpdatesService.class.getPackage().getName() +
+    private static final String EXTRA_STARTED_FROM_NOTIFICATION = LocationUpdatesServiceOld.class.getPackage().getName() +
             ".started_from_notification";
 
     private static final int NOTIFICATION_ID = 1008;
@@ -88,17 +89,19 @@ public class LocationUpdatesService extends Service {
     private String tripID = "";
     private String statusSocket = "";
 
-    private MyApp myApp;
-    private Socket mSocket;
+    //    private MyApp myApp;
+//    private Socket mSocket;
+    private SocketIO mSocket;
 
     @Override
     public void onCreate() {
         super.onCreate();
 //        init FusedLocationProviderClient
-        myApp = (MyApp) getApplication();
-        mSocket = myApp.getSocket();
+//        myApp = (MyApp) getApplication();
+//        mSocket = myApp.getSocket();
 
-        connectCall();
+//        connectCall();
+
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 //        init and set LocationCallBack
@@ -110,12 +113,12 @@ public class LocationUpdatesService extends Service {
                 Intent intent = new Intent(ACTION_BROADCAST);
                 mLocation = locationResult.getLastLocation();
                 Log.d("mlocationResult", "::" + mLocation);
-                intent.putExtra(EXTRA_LOCATION, locationResult.getLastLocation() + " :: ");
+                intent.putExtra(EXTRA_LOCATION, locationResult.getLastLocation());
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
 
 
                 // Update notification content if running as a foreground service.
-                if (serviceIsRunningInForeground(LocationUpdatesService.this)) {
+                if (serviceIsRunningInForeground(LocationUpdatesServiceOld.this)) {
                     mNotificationManager.notify(NOTIFICATION_ID, getNotification());
                     sendSocket();
                 } else {
@@ -145,68 +148,163 @@ public class LocationUpdatesService extends Service {
 //        mServiceHandler = new Handler(handlerThread.getLooper());
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
+        try {
+            mSocket = new SocketIO(getResources().getString(R.string.Socket_URL));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        connectSockt("", "'");
+
     }
 
     private void connectCall() {
 
-        mSocket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-
-                onMessage("EVENT_CONNECT");
-
-            }
-        }).on(Socket.EVENT_CONNECTING, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                onMessage("EVENT_CONNECTING");
-            }
-        }).on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-
-                Log.e("Data-->", "" + args[0].toString());
-
-                onMessage("EVENT_CONNECT_ERROR");
-            }
-        }).on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                onMessage("EVENT_CONNECT_TIMEOUT");
-            }
-        }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                onMessage("EVENT_DISCONNECT");
-            }
-        });
-
-        // Receiving an object
-        mSocket.on("testing_location", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-
-//                JSONObject obj = (JSONObject) args[0];
-                if (args != null && args.length > 0)
-                    Log.e("data", "" + args[args.length - 1]);
-
+//        mSocket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+//            @Override
+//            public void call(Object... args) {
+//
+//                onMessage("EVENT_CONNECT");
+//
+//            }
+//        }).on(Socket.EVENT_CONNECTING, new Emitter.Listener() {
+//            @Override
+//            public void call(Object... args) {
+//                onMessage("EVENT_CONNECTING");
+//            }
+//        }).on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
+//            @Override
+//            public void call(Object... args) {
+//
+//                Log.e("Data-->", "" + args[0].toString());
+//
+//                onMessage("EVENT_CONNECT_ERROR");
+//            }
+//        }).on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
+//            @Override
+//            public void call(Object... args) {
+//                onMessage("EVENT_CONNECT_TIMEOUT");
+//            }
+//        }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+//            @Override
+//            public void call(Object... args) {
+//                onMessage("EVENT_DISCONNECT");
+//            }
+//        });
+//
+//        // Receiving an object
+//        mSocket.on("testing_location", new Emitter.Listener() {
+//            @Override
+//            public void call(Object... args) {
+//
+////                JSONObject obj = (JSONObject) args[0];
+//                if (args != null && args.length > 0)
+//                    Log.e("data", "" + args[args.length - 1]);
+//
 //                Intent intent = new Intent(ACTION_BROADCAST);
 //                Log.d("mlocationResult", "::" + args[args.length - 1]);
 //                intent.putExtra(EXTRA_DATA, args[args.length - 1] + "");
 //                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+//
+//
+//            }
+//        });
+//        if (!mSocket.connected())
+//            mSocket.connect();
+    }
+
+
+    private void connectSockt(String s, String s1) {
+
+
+        mSocket.connect(new IOCallback() {
+            @Override
+            public void onDisconnect() {
+                LogM.v("Disconnected");
+                statusSocket = "Disconnected";
+            }
+
+            @Override
+            public void onConnect() {
+                LogM.v("Connected");
+                statusSocket = "Connected";
 
 
             }
-        });
-        if (!mSocket.connected())
-            mSocket.connect();
-    }
 
+            @Override
+            public void onMessage(String data, IOAcknowledge ack) {
+
+                LogM.e("2222222" + data);
+            }
+
+            @Override
+            public void onMessage(JSONObject json, IOAcknowledge ack) {
+                LogM.e("1111111" + json);
+            }
+
+            @Override
+            public void on(String event, IOAcknowledge ack, Object... args) {
+                statusSocket = "ON";
+                JSONObject joLocation = (JSONObject) args[0];
+                LogM.e("data" + joLocation + joLocation.toString());
+                Intent intent = new Intent(ACTION_BROADCAST);
+                intent.putExtra(EXTRA_DATA, joLocation.toString() + "");
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+
+
+                Log.d("cokt.....>", "chalu tyuu " + event);
+            }
+
+            @Override
+            public void onError(com.example.keerthiacharya.demolocationupdate.SocketIO.SocketIOException socketIOException) {
+                socketIOException.printStackTrace();
+                statusSocket = "Error";
+                mSocket.reconnect();
+            }
+
+
+        });
+
+
+        final Handler myHandler = new Handler();
+
+        Runnable runnableforadd = new Runnable() {
+            public void run() {
+                final JSONObject obj = new JSONObject();
+
+//                {"id":"133","lat":"23.0501412","lng":"72.5045998","oid":"1824","roleId":"2"}
+                try {
+                    obj.put("id", "133");
+                    obj.put("lat", "23.0501412");
+                    obj.put("lng", "72.5045998");
+                    obj.put("oid", "1824");
+                    obj.put("roleId", "2");
+                    mSocket.emit("hefty_location", obj);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                myHandler.postDelayed(this, 2000);
+            }
+        };
+
+        myHandler.postDelayed(runnableforadd, 2000);
+
+
+        // this code will be executed after 2 seconds
+
+
+//                for (int i = 0; i < 1000; i++) {
+
+
+//                }
+
+
+    }
 
     private void onMessage(final String message) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             public void run() {
-                Toast.makeText(LocationUpdatesService.this, message, Toast.LENGTH_SHORT).show();
+                Toast.makeText(LocationUpdatesServiceOld.this, message, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -281,7 +379,7 @@ public class LocationUpdatesService extends Service {
     }
 
     private Notification getNotification() {
-        Intent intent = new Intent(this, LocationUpdatesService.class);
+        Intent intent = new Intent(this, LocationUpdatesServiceOld.class);
 
         CharSequence text = Utils.getLocationText(mLocation);
 
@@ -361,30 +459,30 @@ public class LocationUpdatesService extends Service {
         Log.i(TAG, "Removing location updates");
         try {
             mFusedLocationClient.removeLocationUpdates(mLocationCallback);
-            Utils.setRequestingLocationUpdates(LocationUpdatesService.this, false);
+            Utils.setRequestingLocationUpdates(LocationUpdatesServiceOld.this, false);
             stopSelf();
         } catch (SecurityException unlikely) {
-            Utils.setRequestingLocationUpdates(LocationUpdatesService.this, true);
+            Utils.setRequestingLocationUpdates(LocationUpdatesServiceOld.this, true);
             Log.e(TAG, "Lost location permission. Could not remove updates. " + unlikely);
         }
     }
 
     public void requestLocationUpdates() {
         Log.i(TAG, "Requesting location updates");
-        Utils.setRequestingLocationUpdates(LocationUpdatesService.this, true);
-        startService(new Intent(getApplicationContext(), LocationUpdatesService.class));
+        Utils.setRequestingLocationUpdates(LocationUpdatesServiceOld.this, true);
+        startService(new Intent(getApplicationContext(), LocationUpdatesServiceOld.class));
         try {
             mFusedLocationClient.requestLocationUpdates(mLocationRequest,
                     mLocationCallback, Looper.myLooper());
         } catch (SecurityException unlikely) {
-            Utils.setRequestingLocationUpdates(LocationUpdatesService.this, false);
+            Utils.setRequestingLocationUpdates(LocationUpdatesServiceOld.this, false);
             Log.e(TAG, "Lost location permission. Could not request updates. " + unlikely);
         }
     }
 
     public class LocationBinder extends Binder {
-        public LocationUpdatesService getLocationUpdateService() {
-            return LocationUpdatesService.this;
+        public LocationUpdatesServiceOld getLocationUpdateService() {
+            return LocationUpdatesServiceOld.this;
         }
     }
 
@@ -410,25 +508,25 @@ public class LocationUpdatesService extends Service {
 
     private void sendSocket() {
 
-        if (mSocket != null && mSocket.connected()) {
+        if (mSocket != null && mSocket.isConnected()) {
             final JSONObject obj = new JSONObject();
             try {
                 obj.put("id", "124");
                 obj.put("lat", mLocation.getLatitude() + "");
                 obj.put("lng", mLocation.getLongitude() + "");
-                obj.put("oid", tripID);
+                obj.put("oid", "1824");
                 obj.put("roleId", "10");
 
-                Log.d("socket", "socket updated::" + obj.toString());
+//                Log.d("socket", "socket updated::" + obj.toString());
 
 
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     public void run() {
-                        Toast.makeText(LocationUpdatesService.this, "sendSocket \n" + obj.toString(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LocationUpdatesServiceOld.this, "sendSocket \n" + obj.toString(), Toast.LENGTH_SHORT).show();
                     }
                 });
 
-                mSocket.emit("testing_location", obj.toString());
+                mSocket.emit("hefty_location", obj);
 //                if (Pref.getValue(this, StringLabels.WhereLeft, "").equalsIgnoreCase(START_TRIP) ||
 //                        Pref.getValue(this, StringLabels.WhereLeft, "").equalsIgnoreCase(PICKUP_TRIP)) {
 //                    mSocket.emit("hefty_live_location", obj);
@@ -438,6 +536,11 @@ public class LocationUpdatesService extends Service {
             }
 
 
+        } else {
+            if (mSocket != null) {
+                mSocket.reconnect();
+                onMessage("reconnect");
+            }
         }
 
 

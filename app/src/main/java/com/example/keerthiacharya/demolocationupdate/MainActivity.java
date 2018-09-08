@@ -29,6 +29,7 @@ import android.widget.TextView;
 import com.example.keerthiacharya.demolocationupdate.common.Utils;
 import com.example.keerthiacharya.demolocationupdate.receiver.LocationReceiver;
 import com.example.keerthiacharya.demolocationupdate.service.LocationUpdatesService;
+import com.example.keerthiacharya.demolocationupdate.service.LocationUpdatesServiceOld;
 
 import java.util.Random;
 
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button btnStartUpdate, btnStopUpdate;
     private LocationReceiver rcvMReceiver;
-    private LocationUpdatesService mLUService;
+    private LocationUpdatesServiceOld mLUService;
     private LocationReceiver myReceiver;
     LinearLayout ll;
     ScrollView scrollView;
@@ -63,16 +64,16 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if (checkPermission()) {
             if (mLUService == null)
-                mLUService = new LocationUpdatesService();
+                mLUService = new LocationUpdatesServiceOld();
 
             myReceiver = new LocationReceiver() {
 
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
-                    String data = intent.getStringExtra(LocationUpdatesService.EXTRA_DATA);
+//                    Location location = intent.getParcelableExtra(LocationUpdatesServiceOld.EXTRA_LOCATION);
+                    String data = intent.getStringExtra(LocationUpdatesServiceOld.EXTRA_DATA);
                     if (data != null) {
-                        addText(Utils.getLocationText(location) + "\n" + data);
+                        addText(data+ "\n");
                     }
                     super.onReceive(context, intent);
                 }
@@ -104,11 +105,11 @@ public class MainActivity extends AppCompatActivity {
 
             // Bind to the service. If the service is in foreground mode, this signals to the service
             // that since this activity is in the foreground, the service can exit foreground mode.
-            bindService(new Intent(this, LocationUpdatesService.class), mServiceConection,
+            bindService(new Intent(this, LocationUpdatesServiceOld.class), mServiceConection,
                     Context.BIND_AUTO_CREATE);
 
             LocalBroadcastManager.getInstance(this).registerReceiver(myReceiver,
-                    new IntentFilter(LocationUpdatesService.ACTION_BROADCAST));
+                    new IntentFilter(LocationUpdatesServiceOld.ACTION_BROADCAST));
 
         }
     }
@@ -179,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                 } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Permission was granted.
                     if (mLUService == null)
-                        mLUService = new LocationUpdatesService();
+                        mLUService = new LocationUpdatesServiceOld();
 //                    mLUService.requestLocationUpdates();
                 } else {
                     // Permission denied.
@@ -220,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
     private final ServiceConnection mServiceConection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            mLUService = ((LocationUpdatesService.LocationBinder) service).getLocationUpdateService();
+            mLUService = ((LocationUpdatesServiceOld.LocationBinder) service).getLocationUpdateService();
             mBound = true;
         }
 

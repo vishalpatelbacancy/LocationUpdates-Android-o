@@ -17,11 +17,11 @@ import com.example.keerthiacharya.demolocationupdate.service.LocationUpdatesServ
 public class LocationReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
-        if (location != null) {
-            Toast.makeText(context, Utils.getLocationText(location),
-                    Toast.LENGTH_SHORT).show();
-        }
+//        Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
+//        if (location != null) {
+//            Toast.makeText(context, Utils.getLocationText(location),
+//                    Toast.LENGTH_SHORT).show();
+//        }
     }
 
 

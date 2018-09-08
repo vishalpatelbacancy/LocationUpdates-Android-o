@@ -22,7 +22,7 @@
         </activity>
 
         <service
-            android:name=".service.LocationUpdatesService"
+            android:name=".service.LocationUpdatesServiceOld"
             android:enabled="true"
             android:exported="true" />
 
