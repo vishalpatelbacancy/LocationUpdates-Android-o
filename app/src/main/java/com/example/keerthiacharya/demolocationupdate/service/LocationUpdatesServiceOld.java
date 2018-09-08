@@ -248,7 +248,7 @@ public class LocationUpdatesServiceOld extends Service {
                 JSONObject joLocation = (JSONObject) args[0];
                 LogM.e("data" + joLocation + joLocation.toString());
                 Intent intent = new Intent(ACTION_BROADCAST);
-                intent.putExtra(EXTRA_DATA, joLocation.toString() + "");
+                intent.putExtra(EXTRA_DATA, joLocation.toString());
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
 
 
@@ -275,8 +275,8 @@ public class LocationUpdatesServiceOld extends Service {
 //                {"id":"133","lat":"23.0501412","lng":"72.5045998","oid":"1824","roleId":"2"}
                 try {
                     obj.put("id", "133");
-                    obj.put("lat", "23.0501412");
-                    obj.put("lng", "72.5045998");
+                    obj.put("lat", "23.222222");
+                    obj.put("lng", "72.222222");
                     obj.put("oid", "1824");
                     obj.put("roleId", "2");
                     mSocket.emit("hefty_location", obj);
@@ -512,19 +512,19 @@ public class LocationUpdatesServiceOld extends Service {
             final JSONObject obj = new JSONObject();
             try {
                 obj.put("id", "124");
-                obj.put("lat", mLocation.getLatitude() + "");
-                obj.put("lng", mLocation.getLongitude() + "");
+                obj.put("lat", "23.222222");
+                obj.put("lng", "72.222222");
                 obj.put("oid", "1824");
                 obj.put("roleId", "10");
 
 //                Log.d("socket", "socket updated::" + obj.toString());
 
 
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    public void run() {
-                        Toast.makeText(LocationUpdatesServiceOld.this, "sendSocket \n" + obj.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+//                new Handler(Looper.getMainLooper()).post(new Runnable() {
+//                    public void run() {
+//                        Toast.makeText(LocationUpdatesServiceOld.this, "sendSocket \n" + obj.toString(), Toast.LENGTH_SHORT).show();
+//                    }
+//                });
 
                 mSocket.emit("hefty_location", obj);
 //                if (Pref.getValue(this, StringLabels.WhereLeft, "").equalsIgnoreCase(START_TRIP) ||

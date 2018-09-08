@@ -91,14 +91,14 @@ public class SocketConnectActivity extends AppCompatActivity {
             }
         });
 
-//        mSocket.emit("testing_location", "hello Rajdip", new Ack() {
-//            @Override
-//            public void call(Object... args) {
-//
-//                Log.e("data", "" + args.length);
-//
-//            }
-//        });
+        mSocket.emit("testing_location", "hello Rajdip", new Ack() {
+            @Override
+            public void call(Object... args) {
+
+                Log.e("data", "" + args.length);
+
+            }
+        });
 
         // Receiving an object
         mSocket.on("testing_location", new Emitter.Listener() {

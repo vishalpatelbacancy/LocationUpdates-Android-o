@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button btnStartUpdate, btnStopUpdate;
     private LocationReceiver rcvMReceiver;
-    private LocationUpdatesServiceOld mLUService;
+    private LocationUpdatesService mLUService;
     private LocationReceiver myReceiver;
     LinearLayout ll;
     ScrollView scrollView;
@@ -64,14 +64,14 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if (checkPermission()) {
             if (mLUService == null)
-                mLUService = new LocationUpdatesServiceOld();
+                mLUService = new LocationUpdatesService();
 
             myReceiver = new LocationReceiver() {
 
                 @Override
                 public void onReceive(Context context, Intent intent) {
-//                    Location location = intent.getParcelableExtra(LocationUpdatesServiceOld.EXTRA_LOCATION);
-                    String data = intent.getStringExtra(LocationUpdatesServiceOld.EXTRA_DATA);
+//                    Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
+                    String data = intent.getStringExtra(LocationUpdatesService.EXTRA_DATA);
                     if (data != null) {
                         addText(data+ "\n");
                     }
@@ -105,11 +105,11 @@ public class MainActivity extends AppCompatActivity {
 
             // Bind to the service. If the service is in foreground mode, this signals to the service
             // that since this activity is in the foreground, the service can exit foreground mode.
-            bindService(new Intent(this, LocationUpdatesServiceOld.class), mServiceConection,
+            bindService(new Intent(this, LocationUpdatesService.class), mServiceConection,
                     Context.BIND_AUTO_CREATE);
 
             LocalBroadcastManager.getInstance(this).registerReceiver(myReceiver,
-                    new IntentFilter(LocationUpdatesServiceOld.ACTION_BROADCAST));
+                    new IntentFilter(LocationUpdatesService.ACTION_BROADCAST));
 
         }
     }
@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                 } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Permission was granted.
                     if (mLUService == null)
-                        mLUService = new LocationUpdatesServiceOld();
+                        mLUService = new LocationUpdatesService();
 //                    mLUService.requestLocationUpdates();
                 } else {
                     // Permission denied.
@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
     private final ServiceConnection mServiceConection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            mLUService = ((LocationUpdatesServiceOld.LocationBinder) service).getLocationUpdateService();
+            mLUService = ((LocationUpdatesService.LocationBinder) service).getLocationUpdateService();
             mBound = true;
         }
 

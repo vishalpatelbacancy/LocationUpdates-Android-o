@@ -428,7 +428,7 @@ public class LocationUpdatesService extends Service {
                     }
                 });
 
-                mSocket.emit("testing_location", obj.toString());
+                mSocket.emit("testing_location", obj);
 //                if (Pref.getValue(this, StringLabels.WhereLeft, "").equalsIgnoreCase(START_TRIP) ||
 //                        Pref.getValue(this, StringLabels.WhereLeft, "").equalsIgnoreCase(PICKUP_TRIP)) {
 //                    mSocket.emit("hefty_live_location", obj);
